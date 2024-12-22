@@ -1,27 +1,34 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { text } = body; // First we need to get the actual prompt the user types in the input body
+    const { prompt } = body; // First we need to get the actual prompt the user types in the input body
 
     // We have an API endpoint, so we can just hit it from here in the backend
     // Never call an API endpoint from the internal side
+    const apiSecret = request.headers.get("API_KEY");
 
-    console.log(text);
+    if (apiSecret !== process.env.API_KEY) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.log(prompt);
 
-    const url = new URL("https://j00961010--sd-demo-model-generate.modal.run");
+    const url = new URL(""); // Enter my personal endpoint url
 
-    url.searchParams.set("prompt", text);
+    url.searchParams.set("prompt", prompt);
 
     console.log("Request URL:", url.toString());
 
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
-        "X-API-KEY": process.env.API_KEY || "", // Here is where we are defining our x-api...
+        "API_KEY": process.env.API_KEY || "", // Here is where we are defining our x-api...
         Accept: "image/jpeg",
       },
     });
@@ -50,6 +57,7 @@ export async function POST(request: Request) {
       imageUrl: blob.url, // Displaying it on the frontend, gives you a public server url where you can display the image
     });
   } catch (error) {
+    console.error("Route Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to process request" },
       { status: 500 }
