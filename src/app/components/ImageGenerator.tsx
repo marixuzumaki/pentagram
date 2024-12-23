@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface ImageGeneratorProps {
     generateImage: (
-        text: string
+        inputText: string
     ) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 

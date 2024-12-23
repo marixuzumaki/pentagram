@@ -1,34 +1,30 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+// import env from "../../../../env";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt } = body; // First we need to get the actual prompt the user types in the input body
+    const { inputText } = body; // First we need to get the actual prompt the user types in the input body
 
-    // We have an API endpoint, so we can just hit it from here in the backend
-    // Never call an API endpoint from the internal side
+    const modalToken = process.env.MODAL_TOKEN;
+
     const apiSecret = request.headers.get("API_KEY");
-
     if (apiSecret !== process.env.API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.log(prompt);
+    console.log(inputText);
 
-    const url = new URL(""); // Enter my personal endpoint url
-
-    url.searchParams.set("prompt", prompt);
-
+    const url = new URL("https://j00961010--sd-demo-model-generate.modal.run");
+    url.searchParams.set("prompt", inputText);
     console.log("Request URL:", url.toString());
 
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
-        "API_KEY": process.env.API_KEY || "", // Here is where we are defining our x-api...
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${modalToken}`, // Use MODAL_TOKEN for Modal API
         Accept: "image/jpeg",
       },
     });
@@ -40,8 +36,6 @@ export async function POST(request: Request) {
         `HTTP Error! Status: ${response.status}, message: ${errorText}`
       );
     }
-    // If we get this far, our API request was successful
-    // Now we need somewhere to store our images, I used vercel
     const imageBuffer = await response.arrayBuffer();
 
     const filename = `${crypto.randomUUID()}.jpg`; // Use crypto to sanitize the names of the files that the image are saved as
@@ -57,10 +51,7 @@ export async function POST(request: Request) {
       imageUrl: blob.url, // Displaying it on the frontend, gives you a public server url where you can display the image
     });
   } catch (error) {
-    console.error("Route Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to process request" },
-      { status: 500 }
-    );
+    console.error("Error parsing JSON:", error);
+    return new Response("Invalid JSON", { status: 400 });
   }
 }
