@@ -46,7 +46,7 @@ class Model:
             raise HTTPException(status_code=500, detail=f"Model loading failed: {str(e)}")
 
     @modal.web_endpoint() # Annotate as a web endpoint, our image is going to be generated an is going to be displayed through a URL so we need to create an endpoint 
-    def generate(self, request: Request, inputText: str = Query(..., description="The prompt for image generation")): 
+    def generate(self, request: Request, text: str = Query(..., description="The prompt for image generation")): 
         api_key = request.headers.get("API_KEY")
         if api_key != self.API_KEY: # If the api key sent in the request header does not match the API KEY I set then I will through an error
             raise HTTPException(
@@ -55,7 +55,7 @@ class Model:
             )
 
         try:
-            image = self.pipe(inputText=inputText, num_inference_steps=1, guidance_scale=0.0).images[0]
+            image = self.pipe(prompt=text, num_inference_steps=1, guidance_scale=0.0).images[0]
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Image generation failed: {str(e)}")
 
@@ -71,7 +71,7 @@ class Model:
 # Cron job that pings your API endpoint so it never spins down, helps with execution time
 # Ensures that the container never spins down
 @app.function(
-    schedule=modal.Cron("*/5 * * * *"), 
+    schedule=modal.Cron("*/10 * * * *"), 
     secrets=[modal.Secret.from_name("API_KEY")]
 )
 

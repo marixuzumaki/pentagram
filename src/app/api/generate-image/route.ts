@@ -1,30 +1,28 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
-// import env from "../../../../env";
+import env from "../../../../env";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { inputText } = body; // First we need to get the actual prompt the user types in the input body
-
-    const modalToken = process.env.MODAL_TOKEN;
+    const { text } = body; // First we need to get the actual prompt the user types in the input body
 
     const apiSecret = request.headers.get("API_KEY");
-    if (apiSecret !== process.env.API_KEY) {
+    if (apiSecret !== env.API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.log(inputText);
+    console.log(text);
 
     const url = new URL("https://j00961010--sd-demo-model-generate.modal.run");
-    url.searchParams.set("prompt", inputText);
+    url.searchParams.set("prompt", text);
     console.log("Request URL:", url.toString());
 
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${modalToken}`, // Use MODAL_TOKEN for Modal API
+        API_KEY: `Bearer ${env.API_KEY}`,
         Accept: "image/jpeg",
       },
     });

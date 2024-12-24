@@ -1,15 +1,15 @@
 // This file is running on the server side, so no one will be able to see it and the sensitive information that I defined in the headers will not be visible to the users
 "use server";
 
-export async function generateImage(inputText: string) {
+export async function generateImage(text: string) {
   try {
     const response = await fetch("http://localhost:3000/api/generate-image", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.MODAL_TOKEN}`,
+        API_KEY: `Bearer ${process.env.API_KEY}`,
       },
-      body: JSON.stringify({ inputText }),
+      body: JSON.stringify({ text }),
     });
 
     if (!response.ok) {

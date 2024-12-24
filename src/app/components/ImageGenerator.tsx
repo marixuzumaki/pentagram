@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface ImageGeneratorProps {
     generateImage: (
-        inputText: string
+        text: string
     ) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 
@@ -56,7 +56,7 @@ return (
         <div className="w-full max-w-2xl rounded-lg overflow-hidden shadow-lg">
           <img 
             src={imageUrl} 
-            alt="Generated image"
+            alt="Generated artwork"
             className="w-full h-auto"
           />
         </div>
