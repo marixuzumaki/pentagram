@@ -3,11 +3,17 @@
 
 export async function generateImage(text: string) {
   try {
-    const response = await fetch("http://localhost:3000/api/generate-image", {
+    if (!process.env.MODAL_API_KEY) {
+      throw new Error("API_KEY is not set in environment variables.");
+    }
+
+    const apiUrl = "http://localhost:3000/api/generate-image";
+
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        API_KEY: `Bearer ${process.env.API_KEY}`,
+        "X-API-KEY": process.env.MODAL_API_KEY || "",
       },
       body: JSON.stringify({ text }),
     });
@@ -17,7 +23,7 @@ export async function generateImage(text: string) {
       const errorData = await response.json();
       console.error("API response:", errorData);
       throw new Error(
-        `HTTP Error! Status: ${response.status}, message: ${errorData}`
+        `HTTP Error! Status: ${response.status}, message: ${JSON.stringify(errorData)}`
       );
     }
 

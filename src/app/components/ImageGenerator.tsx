@@ -21,15 +21,15 @@ export default function ImageGenerator({ generateImage }: ImageGeneratorProps) {
         setError(null);
 
         try {
-            const result = await generateImage(inputText);
+            const data = await generateImage(inputText);
 
-            if(!result.success) {
-                throw new Error(result.error || "Failed to generate image");
+            if(!data.success) {
+                throw new Error(data.error || "Failed to generate image");
             }
 
-            if (result.imageUrl) {
+            if (data.imageUrl) {
                 const img = new Image();
-                const url = result.imageUrl;
+                const url = data.imageUrl;
                 img.onload = () => {
                     setImageUrl(url);
                 };
@@ -50,17 +50,25 @@ export default function ImageGenerator({ generateImage }: ImageGeneratorProps) {
 };
 
 return (
+    // TODO: Update the UI here to show the images generated
+
     <div className="min-h-screen flex flex-col justify-between p-8">
-      <main className="flex-1">{/*If you have data.imageUrl then you will display it here*/}
-      {imageUrl && (
-        <div className="w-full max-w-2xl rounded-lg overflow-hidden shadow-lg">
-          <img 
-            src={imageUrl} 
-            alt="Generated artwork"
-            className="w-full h-auto"
-          />
-        </div>
-      )}
+      <main className="flex-1 flex flex-col items-center gap-8">
+        {error && (
+          <div className="w-full max-w-2xl p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 dark:bg-red-900 dark:text-red-100">
+            {error}
+          </div>
+        )}
+
+        {imageUrl && (
+          <div className="w-full max-w-2xl rounded-lg overflow-hidden shadow-lg">
+            <img
+              src={imageUrl}
+              alt="Generated Image"
+              className="w-full h-full"
+            />
+          </div>
+        )}
       </main>
 
       <footer className="w-full max-w-3xl mx-auto">
@@ -69,7 +77,7 @@ return (
             <input
               type="text"
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={e => setInputText(e.target.value)}
               className="flex-1 p-3 rounded-lg bg-black/[.05] dark:bg-white/[.06] border border-black/[.08] dark:border-white/[.145] focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
               placeholder="Describe the image you want to generate..."
               disabled={isLoading}
